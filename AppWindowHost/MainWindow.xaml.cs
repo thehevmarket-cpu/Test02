@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Threading;
 using System.Windows;
 using System.Windows.Input;
 using Microsoft.Win32;
@@ -121,7 +120,14 @@ public partial class MainWindow : Window
         }
 
         var point = HostSurface.TransformToAncestor(this).Transform(new System.Windows.Point(0, 0));
-        MoveWindow(hostedWindowHandle, (int)point.X, (int)point.Y, (int)HostSurface.ActualWidth, (int)HostSurface.ActualHeight, true);
+        var source = PresentationSource.FromVisual(this);
+        var transform = source?.CompositionTarget?.TransformToDevice ?? new System.Windows.Media.Matrix(1, 0, 0, 1, 0, 0);
+        var x = (int)Math.Round(point.X * transform.M11);
+        var y = (int)Math.Round(point.Y * transform.M22);
+        var width = (int)Math.Round(HostSurface.ActualWidth * transform.M11);
+        var height = (int)Math.Round(HostSurface.ActualHeight * transform.M22);
+
+        MoveWindow(hostedWindowHandle, x, y, Math.Max(0, width), Math.Max(0, height), true);
     }
 
     private void CloseHostedProcess()
