@@ -20,7 +20,12 @@ public partial class MainWindow : Window
     private const int WsThickFrame = 0x00040000;
     private const int WsMinimizeBox = 0x00020000;
     private const int WsMaximizeBox = 0x00010000;
+    private const int WsPopup = unchecked((int)0x80000000);
     private const int WsChild = 0x40000000;
+    private const uint SwpNoZOrder = 0x0004;
+    private const uint SwpNoActivate = 0x0010;
+    private const uint SwpFrameChanged = 0x0020;
+    private const uint SwpShowWindow = 0x0040;
 
     public MainWindow()
     {
@@ -82,10 +87,11 @@ public partial class MainWindow : Window
         try
         {
             var applicationDirectory = Path.GetDirectoryName(path) ?? Environment.CurrentDirectory;
+            var workingDirectory = Directory.GetParent(applicationDirectory)?.FullName ?? applicationDirectory;
             hostedProcess = Process.Start(new ProcessStartInfo(path)
             {
                 UseShellExecute = true,
-                WorkingDirectory = applicationDirectory
+                WorkingDirectory = workingDirectory
             });
             if (hostedProcess is null)
             {
@@ -104,7 +110,7 @@ public partial class MainWindow : Window
                 throw new InvalidOperationException("应用程序没有可嵌入的主窗口。");
             }
 
-            SetWindowLong(hostedWindowHandle, GwlStyle, (GetWindowLong(hostedWindowHandle, GwlStyle) & ~(WsCaption | WsThickFrame | WsMinimizeBox | WsMaximizeBox)) | WsChild);
+            SetWindowLong(hostedWindowHandle, GwlStyle, (GetWindowLong(hostedWindowHandle, GwlStyle) & ~(WsCaption | WsThickFrame | WsMinimizeBox | WsMaximizeBox | WsPopup)) | WsChild);
             SetParent(hostedWindowHandle, new System.Windows.Interop.WindowInteropHelper(this).Handle);
             ResizeHostedWindow();
             StatusText.Text = $"已嵌入：{Path.GetFileName(path)}";
@@ -132,7 +138,7 @@ public partial class MainWindow : Window
         var width = (int)Math.Round(HostSurface.ActualWidth * transform.M11);
         var height = (int)Math.Round(HostSurface.ActualHeight * transform.M22);
 
-        MoveWindow(hostedWindowHandle, x, y, Math.Max(0, width), Math.Max(0, height), true);
+        SetWindowPos(hostedWindowHandle, IntPtr.Zero, x, y, Math.Max(0, width), Math.Max(0, height), SwpNoZOrder | SwpNoActivate | SwpFrameChanged | SwpShowWindow);
     }
 
     private void CloseHostedProcess()
@@ -151,7 +157,7 @@ public partial class MainWindow : Window
     private static extern IntPtr SetParent(IntPtr childHandle, IntPtr parentHandle);
 
     [DllImport("user32.dll", SetLastError = true)]
-    private static extern bool MoveWindow(IntPtr handle, int x, int y, int width, int height, bool repaint);
+    private static extern bool SetWindowPos(IntPtr handle, IntPtr insertAfter, int x, int y, int width, int height, uint flags);
 
     [DllImport("user32.dll", EntryPoint = "GetWindowLongPtrW")]
     private static extern IntPtr GetWindowLongPtr(IntPtr handle, int index);
