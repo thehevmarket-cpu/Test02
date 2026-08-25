@@ -1,0 +1,37 @@
+﻿<Window x:Class="AppWindowHost.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="App Window Host" Height="700" Width="1100"
+        MinHeight="420" MinWidth="640"
+        Background="#F4F6F8"
+        AllowDrop="True"
+        Drop="Window_Drop"
+        DragOver="Window_DragOver">
+    <DockPanel>
+        <Border DockPanel.Dock="Top" Background="#17212B" Padding="22,18">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                    <TextBlock Text="APP WINDOW HOST" Foreground="#8EE3C4" FontSize="12" FontWeight="Bold" />
+                    <TextBlock Text="把应用放进这个窗口" Foreground="White" FontSize="24" FontWeight="SemiBold" Margin="0,5,0,0" />
+                    <TextBlock x:Name="StatusText" Text="拖放一个 .exe 文件到下方区域" Foreground="#B8C4CC" FontSize="13" Margin="0,6,0,0" />
+                </StackPanel>
+                <Button Grid.Column="1" Content="选择应用程序" Padding="18,10" VerticalAlignment="Center"
+                        Click="ChooseApp_Click" Background="#8EE3C4" Foreground="#17212B" BorderThickness="0" />
+            </Grid>
+        </Border>
+        <Border x:Name="HostSurface" Margin="22" Background="#FFFFFF" BorderBrush="#CBD5DC" BorderThickness="1"
+                CornerRadius="6" AllowDrop="True" Drop="Window_Drop" DragOver="Window_DragOver">
+            <Grid>
+                <StackPanel x:Name="EmptyState" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <TextBlock Text="↓" HorizontalAlignment="Center" FontSize="42" Foreground="#8EE3C4" />
+                    <TextBlock Text="将应用程序拖放到这里" HorizontalAlignment="Center" FontSize="22" FontWeight="SemiBold" Foreground="#17212B" />
+                    <TextBlock Text="支持 .exe 文件；应用启动后会嵌入此区域" HorizontalAlignment="Center" FontSize="14" Foreground="#687781" Margin="0,8,0,0" />
+                </StackPanel>
+            </Grid>
+        </Border>
+    </DockPanel>
+</Window>
