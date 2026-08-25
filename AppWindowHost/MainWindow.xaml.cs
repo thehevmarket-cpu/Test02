@@ -81,7 +81,12 @@ public partial class MainWindow : Window
 
         try
         {
-            hostedProcess = Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
+            var applicationDirectory = Path.GetDirectoryName(path) ?? Environment.CurrentDirectory;
+            hostedProcess = Process.Start(new ProcessStartInfo(path)
+            {
+                UseShellExecute = true,
+                WorkingDirectory = applicationDirectory
+            });
             if (hostedProcess is null)
             {
                 throw new InvalidOperationException("无法启动应用程序。");
